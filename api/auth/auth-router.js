@@ -1,15 +1,15 @@
-const router = require('express').Router();
+const router = require("express").Router();
 const bcrypt = require("bcryptjs");
-const jwt = require('jsonwebtoken')
-const Model = require("../model/models")
-const { JWT_SECRET } = require('../../cilent/config')
+const jwt = require("jsonwebtoken");
+const Model = require("../model/models");
+const { JWT_SECRET } = require("../../cilent/config");
 
-router.get('/users', async  (req, res, next) => {
-  let users = await Model.getAll()
-  res.status(200).json(users)
-})
+router.get("/users", async (req, res, next) => {
+  let users = await Model.getAll();
+  res.status(200).json(users);
+});
 
-router.post('/register', async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -35,24 +35,26 @@ router.post('/register', async (req, res, next) => {
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
-    try {
+  try {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ message: "username and password required" });
+      return res
+        .status(400)
+        .json({ message: "username and password required" });
     }
 
     const hash = bcrypt.hashSync(password, 8);
 
     const existingUser = await Model.findByUsername(username);
     if (existingUser) {
-      return res.status(409).json({ message: 'username taken' });
+      return res.status(409).json({ message: "username taken" });
     }
 
     const user = { username, password: hash };
     const saved = await Model.add(user);
 
-      res.status(201).json({
+    res.status(201).json({
       id: saved.id,
       username: saved.username,
       password: saved.password,
@@ -62,8 +64,7 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-
-router.post('/login', (req, res, next) => {
+router.post("/login", (req, res, next) => {
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -88,9 +89,12 @@ router.post('/login', (req, res, next) => {
       the response body should include a string exactly as follows: "invalid credentials".  
   */
   let { username, password } = req.body;
-   if (!username || !password) {
-     return res.status(400).json({ message: "invalid credentials" });
-   }
+  if (!username || !password) {
+    return res.status(400).json({ message: "username and password required" });
+  }
+  if (username === "" || password === "") {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
 
   Model.findByUsername(username)
     .then((user) => {
@@ -117,6 +121,5 @@ function buildToken(user) {
   };
   return jwt.sign(payload, JWT_SECRET, options);
 }
-
 
 module.exports = router;
