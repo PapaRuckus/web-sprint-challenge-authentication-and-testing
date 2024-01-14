@@ -89,7 +89,7 @@ router.post('/login', (req, res, next) => {
   */
   let { username, password } = req.body;
    if (!username || !password) {
-     return res.status(400).json({ message: "username and password required" });
+     return res.status(400).json({ message: "invalid credentials" });
    }
 
   Model.findByUsername(username)
