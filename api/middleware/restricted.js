@@ -1,6 +1,19 @@
 const jwt = require('jsonwebtoken')
+const { JWT_SECRET } = require('../../cilent/config')
 module.exports = (req, res, next) => {
-  next();
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        next({status: 401, message: `token bad ${err.message}`})
+      } else {
+        req.decodedJwt = decoded
+        next()
+      }
+    })
+  } else {
+    next({status: 401, message: "you shall not pass without a token"})
+  }
   /*
     IMPLEMENT
 
