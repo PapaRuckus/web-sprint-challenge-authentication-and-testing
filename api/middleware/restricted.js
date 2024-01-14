@@ -2,13 +2,14 @@ const jwt = require('jsonwebtoken')
 const { JWT_SECRET } = require('../../cilent/config')
 module.exports = (req, res, next) => {
   const token = req.headers.authorization;
+
   if (!token) {
-    return next({ status: 401, message: "token required" });
+    return res.status(401).json({ message: "Token required" });
   }
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      return next({ status: 401, message: `token invalid ${err.message}` });
+      return res.status(401).json({ message: `Invalid token: ${err.message}` });
     }
 
     req.decodedJwt = decoded;
