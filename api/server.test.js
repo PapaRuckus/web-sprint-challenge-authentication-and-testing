@@ -10,15 +10,13 @@ beforeAll(async () => {
 beforeEach(async () => {
   await db.seed.run();
 });
-afterAll(async () => {
-  await db.destroy();
-});
 
 describe("[POST] /login", () => {
   const Person = { username: "Captain Marvel", password: "foobar" };
   test("successful login with 200 ok", async () => {
     const res = await request(server).post("/api/auth/login").send(Person);
     expect(res.status).toBe(200);
+    token = res.body.token;
   });
   test("responds with message and token", async () => {
     const res = await request(server).post("/api/auth/login").send(Person);
@@ -56,6 +54,24 @@ describe("[POST] /register", () => {
       password: userInDatabase.password,
     });
   });
+});
+
+describe("[GET] /jokes", () => {
+  test("responds with 200 ok", async () => {
+    const res = await request(server)
+      .get("/api/jokes")
+      .set("Authorization", `${token}`);
+
+    expect(res.status).toBe(200);
+  });
+   test("checks for the jokes", async () => {
+     const res = await request(server)
+       .get("/api/jokes")
+       .set("Authorization", `${token}`);
+
+     const jokesArray = res.body
+     expect(jokesArray).toHaveLength(3);
+   });
 });
 
 // use mod4 guided for ref
